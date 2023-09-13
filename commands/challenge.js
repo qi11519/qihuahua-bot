@@ -102,35 +102,130 @@ module.exports = {
 }
 
 const fightGame = async (message, challenger, challenged, client) => {
+
+  let challengerObj = { name: challenger, hp: 20, status:["Stunned", "Poisoned"]};
+  let challengedObj = { name: challenged, hp: 20, status:["Bleed"]};
+
+  /*
   let challengerHP = 25;
   let challengerStatus = ["Stunned", "Poisoned"];
   let challengedHP = 25;
   let challengedStatus = ["Bleed"];
+  */
+  const msgStartGame = await message.channel.send(`DING DING DING!!! FIGHT STARTED`);
 
+  await message.channel.send(`--------------------Player Stat--------------------`);
+  
   const msgCH1HP = await message.channel.send(
-    `Challenger ${challenger} \tHP: ${challengerHP} \tStatus: [ ${challengerStatus} ]`
+    `Challenger ${challengerObj.name} \tHP: ${challengerObj.hp}/20 \tStatus: [ ${challengerObj.status} ]`
   );
     
   const msgCH2HP = await message.channel.send(
-    `Challenged ${challenged} \tHP: ${challengedHP} \tStatus: [ ${challengedStatus} ]`
+    `Challenged ${challengedObj.name} \tHP: ${challengedObj.hp}/20 \tStatus: [ ${challengedObj.status} ]`
   );
 
-  //setTimeout(async () => { msgHP.edit(msgHP.content + "\nHello");}, 5000);
+  let decideOrder = getRandomInt(2);
+  let firstHandMessage;
 
-  //fightStart
+  if (decideOrder == 0){
+    firstHandMessage = `Challenger ${challengerObj.name} goes first~`;
+  } else if (decideOrder == 1){
+    firstHandMessage = `Challenged ${challengedObj.name} goes first~`;
+  }
+  const msgGame = await message.channel.send(`--------------------FIGHT START--------------------\n${firstHandMessage}`);
+  //msgGame = await msgGame.edit(`${msgGame.content}\n${firstHandMessage}`);
   
-  const msgAction = await message.channel.send(`Do something`);
+  setTimeout(async () => { await fightStart(message, challengerObj, challengedObj, msgCH1HP, msgCH2HP, msgGame, decideOrder, client);}, 2000);
 
-  setTimeout(async () => { msgAction.edit(msgAction.content + "\nDo more thing");}, 5000);
-
-  message.channel.send("Fight ended.")
 }
 
-const fightStart = async (message, challenger, challengerHP, challengerStatus, challenged, challengedHP, challengedStatus, msgCH1HP, msgCH2HP, client) => {
-
+//const fightStart = async (message, challenger, challengerHP, challengerStatus, challenged, challengedHP, challengedStatus, msgCH1HP, msgCH2HP, client) => {
+const fightStart = async (message, challengerObj, challengedObj, msgCH1HP, msgCH2HP, msgGame, decideOrder, client) => {
+  
+  let position;
+  let unitTarget;
   let round = 1;
   
-  while (challengerHP > 0 && challenged > 0){
+  while (challengerObj.hp > 0 && challengedObj.hp > 0){
+
+    let decideAction = getRandomInt(10);
+
+    if (decideOrder === 0){
+      unitTarget = await { order: decideOrder, first: challengerObj, second: challengedObj, firstHP: msgCH1HP, secondHP: msgCH2HP, msgGame: msgGame};
+      decideOrder = 1;
+    } else if (decideOrder === 1){
+      unitTarget = await { order: decideOrder, first: challengedObj, second: challengerObj, firstHP: msgCH2HP, secondHP: msgCH1HP, msgGame: msgGame};
+      decideOrder = 0;
+    }
+
+    if (decideAction >= 0 && decideAction < 10){ //0~5(6)
+      //ATTACK
+      //setTimeout(async () => { await Attack(message, unitTarget, round);}, 1000);
+      await Attack(message, unitTarget, round);
+      
+    }/* else if (decideAction > 5 && decideAction < 7){ //6
+      //POISON or BLEED
+
+      
+    } else if (decideAction > 6 && decideAction < 8){ //7
+      //FLEED
+
+      
+    } else if (decideAction > 7 && decideAction < 10){ //8,9
+      //HEAL
+      
+      
+    }*/
     
+    round +=1;
   }
+
+  let gameEnded = "Fight ended.";
+  msgGame = await msgGame.edit(`${msgGame.content}\n${gameEnded}`);
+  
+  if (unitTarget.first.hp < 0 ){
+
+    position = unitTarget.secondHP.content.split(' ')[0];
+
+    gamneResultMessage = await message.channel.send(
+    `The Fight's Winner is the ${position} ${unitTarget.second.name} !!!`);
+    
+  } else if (unitTarget.second.hp < 0){
+
+    position = unitTarget.firstHP.content.split(' ')[0];
+
+    gamneResultMessage = await message.channel.send(
+    `The Fight's Winner is the  ${position} ${unitTarget.first.name} !!!`);
+  }
+}
+
+function getRandomInt (max) {
+  return Math.floor(Math.random() * max);
+}
+
+const Attack = async (message, unitTarget, round) => {
+  let damageValue = getRandomInt(6);
+  let dodgeChance = getRandomInt(6);
+
+  let attackResultMessage;
+  
+  if (damageValue === 0){ damageValue = 1; }
+  
+  if (dodgeChance > 0){
+    unitTarget.second.hp -= damageValue;
+
+    attackResultMessage = 
+    `Round ${round} : ${unitTarget.first.name} has dealt ${damageValue} to ${unitTarget.second.name}!!!`;
+
+    let position = unitTarget.secondHP.content.split(' ')[0];
+    
+    unitTarget.secondHP = await unitTarget.secondHP.edit(`${position} ${unitTarget.second.name} \tHP: ${unitTarget.second.hp}/25 \tStatus: [ ${unitTarget.second.status} ]`);
+    
+  } else {
+    attackResultMessage = 
+    `Round ${round} : ${unitTarget.first.name} performed an attack, but he missed! Pathetic...`;
+  }
+
+  unitTarget.msgGame = await unitTarget.msgGame.edit(`${unitTarget.msgGame.content}\n${attackResultMessage}`);
+  
 }

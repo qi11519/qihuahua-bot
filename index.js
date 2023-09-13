@@ -79,7 +79,7 @@ client.on('ready', async () => {
   setInterval(async () => {
     twitchMessageSent = await checkStream(client, twitchMessageSent);
     ytMessageSent = await checkYTUpload(client, ytMessageSent);
-  }, 290000);
+  }, 1790000);
 });
 
 /////////////////////////////////////////////////////////////

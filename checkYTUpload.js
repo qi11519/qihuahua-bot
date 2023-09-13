@@ -27,7 +27,7 @@ module.exports = async function checkYTUpload(client1, messageSent) {
       const videoThumbnail = latestVideo.thumbnails[3].url;
 
       //console.log(channelName);
-      //console.log(videoTitle);
+      
       
       const uploadTime = latestVideo.uploadDate;
 
@@ -35,10 +35,13 @@ module.exports = async function checkYTUpload(client1, messageSent) {
       
       const currentTime = new Date().getTime();
 
+      //console.log("Latest Video now: " , videoTitle, " & ", currentUploadTime);
       //console.log(currentTime);
       
       //if (Number(currentUploadTime[0]) <= 40 && currentUploadTime[1] === "seconds") {
-      if (Number(currentUploadTime[0]) <= 5 && currentUploadTime[1] === "minutes") {
+      if (Number(currentUploadTime[0]) <= 30 && currentUploadTime[1] === "minutes") {
+        console.log("Its newly baked...")
+        
         if (messageSent != videoUrl) {
           
           messageSent = videoUrl;

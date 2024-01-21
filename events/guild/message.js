@@ -36,7 +36,6 @@ module.exports = (client, Discord, message, interaction) => {
   if(command && cmd != "rps"){ 
     command.execute(message, args, cmd, client);
   } else {
-    console.log("it is rps");
     //command.execute(interaction, args, cmd, client);
   }
 }

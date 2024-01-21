@@ -18,29 +18,26 @@ module.exports = async function checkYTUpload(client1, messageSent) {
     await channel.videos.next();
 
     const channelName = channel.name;
-    
+
+    // If video is found
     if (channel.videos.items[0]) {
       let latestVideo = channel.videos.items[0];
-      
+
+      // Video info: URL, Title, Thumbnail link, Upload Time (How long ago)
       const videoUrl = `https://www.youtube.com/watch?v=${latestVideo.id}`;
       const videoTitle = latestVideo.title;
       const videoThumbnail = latestVideo.thumbnails[3].url;
-
-      //console.log(channelName);
-      
-      
       const uploadTime = latestVideo.uploadDate;
 
+      // 'uploadTime' will return as '3 hours ago', '30 minutes ago', etc.
+      // then split by spacing
+      // Exp: '30 minutes ago', split into {'30','minutes','ago'}
       const currentUploadTime = uploadTime.split(' ');
-      
-      const currentTime = new Date().getTime();
 
-      //console.log("Latest Video now: " , videoTitle, " & ", currentUploadTime);
-      //console.log(currentTime);
-      
-      //if (Number(currentUploadTime[0]) <= 40 && currentUploadTime[1] === "seconds") {
+      // For every 30 minutes,
+      // Check the lastest video if it is uploaded within 30 minutes,
+      // If condition true, send a message to the discord channel, else, do nothing.
       if (Number(currentUploadTime[0]) <= 30 && currentUploadTime[1] === "minutes") {
-        console.log("Its newly baked...")
         
         if (messageSent != videoUrl) {
           

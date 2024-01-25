@@ -53,12 +53,12 @@ module.exports = {
     }
     
     let choice = parseInt(args[0]); //Turn input into integer, coz user input is always string
-    console.log('Jumping To...');
+    // console.log('Jumping To...');
   
     if (isNaN(choice)) { //Usually some retarded will enter something other than digit
       embed_Msg.description = "Maybe you should give a proper number, not random text... [Invalid index for Jumping to other song.]";
       return message.channel.send({ embeds: [embed_Msg] });
-      console.log('Failed Jump To! [1]');
+      // console.log('Failed Jump To! [1]');
   
     } else {
       if (client.server_queue.songs.length > choice) { //If given index is reachable
@@ -71,14 +71,14 @@ module.exports = {
         for (i = choice; i > 1; i--){
           client.server_queue.songs.shift(); //Skip/Remove one by one
         }
-        console.log('Jump To!');
+        // console.log('Jump To!');
         
         client.player.stop(); //Stop audio player, turn it into 'Idle' state
   
       } else { //If given index is bigger than the queue's length
         embed_Msg.description = "I don't think that index is reachable. [Input index doesn't match the index of song queue.]";
         message.channel.send({ embeds: [embed_Msg] });
-        console.log('Failed Jump To! [2]');
+        // console.log('Failed Jump To! [2]');
       }
     }
   }

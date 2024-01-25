@@ -83,6 +83,6 @@ module.exports = {
     //Then the audio player will auto go to next song. (Re)
     client.player.stop();
 
-    console.log('Move to Next Song');
+    // console.log('Move to Next Song');
   }
 }

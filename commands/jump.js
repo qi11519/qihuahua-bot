@@ -65,7 +65,7 @@ module.exports = {
     if (isNaN(choice)) { //Usually some retarded will enter something other than digit
       embed_Msg.description = "Maybe you should give a proper number, not random text... [Invalid index for Jumping to other song.]";
       return message.channel.send({ embeds: [embed_Msg] });
-      console.log('>Failed Jump! [1]');
+      // console.log('>Failed Jump! [1]');
   
     } else {
       if (client.server_queue.songs.length > choice) { //If given index is reachable
@@ -77,13 +77,13 @@ module.exports = {
         //Then skip the current playing song
         client.server_queue.songs.unshift(server_queue.songs.splice(choice - 1, 1)[0]);
   
-        console.log('>Jump!');
+        // console.log('>Jump!');
         client.player.stop();
   
       } else { //If given index is bigger than the queue's length
         embed_Msg.description = "I don't think that index is reachable. [Input index doesn't match the index of song queue.]";
         message.channel.send({ embeds: [embed_Msg] });
-        console.log('>Failed Jump! [2]');
+        // console.log('>Failed Jump! [2]');
       }
     }
   }

@@ -73,7 +73,7 @@ module.exports = {
       ],
     };
 
-    console.log();
+    // console.log();
 
     //Send song info into text-channel
     await client.server_queue.text_channel.send({ embeds: [playing_Embed_Msg], files: ['./images/qihuahua.jpg'] });

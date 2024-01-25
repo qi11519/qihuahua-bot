@@ -61,8 +61,15 @@ module.exports = {
           // Hence can add new pending match
           if (matchChecker === 0) {
 
-            message.channel.send(`Watch out! ${challenger} is challenging ${challenged} for a fight!!!\n${args[0]}, if you want to accept the challenge, type:\n> /challenge accept <@${message.author.id}>\n> /ch a <@${message.author.id}>\nOr Declining:\n> /challenge decline <@${message.author.id}>\n> /ch d <@${message.author.id}>`);
+            if (challenger === challenged) {
 
+              message.channel.send(`Watch out! ${challenger} is challenging...wait a minute...challenging himself? Anyway.....\n${args[0]}, if you want to accept the challenge, type:\n> /challenge accept <@${message.author.id}>\n> /ch a <@${message.author.id}>\nOr Declining:\n> /challenge decline <@${message.author.id}>\n> /ch d <@${message.author.id}>`);
+              
+            } else {
+            
+              message.channel.send(`Watch out! ${challenger} is challenging ${challenged} for a fight!!!\n${args[0]}, if you want to accept the challenge, type:\n> /challenge accept <@${message.author.id}>\n> /ch a <@${message.author.id}>\nOr Declining:\n> /challenge decline <@${message.author.id}>\n> /ch d <@${message.author.id}>`);
+            
+            }
             fightingList.push(match);
 
             // If similar match is found
@@ -117,7 +124,7 @@ module.exports = {
             } else {
               
               if (challenger === challenged) {
-                gameAnnouceMessageTemplate = `:mega: :mega: Okay... ${challenger} is trying to fight hm :crossed_swords: :crossed_swords:`
+                gameAnnouceMessageTemplate = `:mega: :mega: Okay... ${challenger} is trying to fight himself for some reason... :crossed_swords: :crossed_swords:`
               } else {
                 gameAnnouceMessageTemplate = `:mega: :mega: Seems like we will have a fight going on between ${challenger} and ${challenged} now! :crossed_swords: :crossed_swords:`
               }
@@ -127,7 +134,7 @@ module.exports = {
               // Counting down from five
               // Making it as theres clock animation
               let i = 6;
-              let iTime = ['12', '2', '4', '6', '8', '10', '12'];
+              let iTime = ['12', '10', '8', '6', '4', '2', '12'];
               let iText = ['zero', 'one', 'two', 'three', 'four', 'five', 'six'];
 
               // Initial timer, set as 6
@@ -260,7 +267,7 @@ const fightGame = async (message, challenger, challenged, gameAnnouceMessage, cl
   let challengerObj = { name: challenger, hp: 10, status: [] };
   let challengedObj = { name: challenged, hp: 10, status: [] };
 
-  gameAnnouceMessage = await gameAnnouceMessage.edit(`${gameAnnouceMessage.content}\n:bellhop: :bellhop: :bellhop: FIGHT STARTED!!!`);
+  gameAnnouceMessage = await gameAnnouceMessage.edit(`${gameAnnouceMessage.content}\n:bellhop: :bellhop: :bellhop: :bellhop: :bellhop: FIGHT STARTED :bellhop: :bellhop: :bellhop: :bellhop: :bellhop:`);
 
   gameAnnouceMessage = await gameAnnouceMessage.edit(`${gameAnnouceMessage.content}\n**|>---------------<| PLAYER STAT |>---------------<|**`);
 
@@ -307,7 +314,7 @@ const fightStart = async (message, challengerObj, challengedObj, msgCH1HP, msgCH
   while (challengerObj.hp > 0 && challengedObj.hp > 0) {
 
     // Random number to decide which move
-    let decideAction = getRandomInt(19);
+    let decideAction = getRandomInt(25);
 
     ///////////////////////
     // If challenger goes first
@@ -333,30 +340,6 @@ const fightStart = async (message, challengerObj, challengedObj, msgCH1HP, msgCH
       // Settle status at start of the round
       await statusSettle(message, unitTarget);
 
-      ///////////////////////
-      // Waking up from stunned
-      // Each round happened, only if Stunned is -1, then its status is removed
-      let playerArray = [unitTarget.first, unitTarget.second];
-
-      playerArray.forEach(async (player) => {
-        let isStunned = player.status.find(status => status.status === "Stunned");
-
-        if (isStunned) {
-          // Reduce 1 round of stun status
-          isStunned.round -= 1;
-
-          // If the status is expired
-          if (isStunned.round < 0) {
-            // Remove the stunned status
-            player.status = player.status.filter(status => status.round > -1);
-
-            unitTarget.msgGame = await unitTarget.msgGame.edit(`${unitTarget.msgGame.content}\n${player.name} has woke up from stunned!`);
-
-          }
-
-        }
-      });
-
     }
 
     let isStunned = unitTarget.first.status.find(status => status.status === "Stunned");
@@ -366,19 +349,19 @@ const fightStart = async (message, challengerObj, challengedObj, msgCH1HP, msgCH
     // Conduct action based on randomized number
     if (challengerObj.hp > 0 && challengedObj.hp > 0 && !isStunned) {
 
-      if (decideAction >= 0 && decideAction < 11) { //0~10
+      if (decideAction >= 0 && decideAction < 14) { // 0~13
         //ATTACK
         await Attack(message, unitTarget, round);
 
-      } else if (decideAction > 10 && decideAction < 15) { //11~14
+      } else if (decideAction > 13 && decideAction < 21) { // 14~20
         //POISON or BLEED or STUNNED
         await Special(message, unitTarget, round);
 
-      } else if (decideAction > 14 && decideAction < 16) { //15
+      } else if (decideAction > 20 && decideAction < 22) { // 21
         //FLEED
         await Flee(message, unitTarget, round);
 
-      } else if (decideAction > 15 && decideAction < 19) { //16~18
+      } else if (decideAction > 21 && decideAction < 25) { // 21~24
         //HEAL
         await Heal(message, unitTarget, round);
 
@@ -409,7 +392,13 @@ const fightStart = async (message, challengerObj, challengedObj, msgCH1HP, msgCH
 
     ///////////////////////
     //Annouce winner if one of the player lost
-    if (unitTarget.first.hp < 1) { // If first player lost (HP to 0)
+    if (unitTarget.first.hp < 1 && unitTarget.second.hp < 1) { // DRAW
+      unitTarget.msgGame = await unitTarget.msgGame.edit(`${unitTarget.msgGame.content}\n${gameEnded}`);
+      
+      gameResultMessage = await message.channel.send(
+        `The Fight has ended in DRAW!!!`);
+    
+    } else if (unitTarget.first.hp < 1) { // If first player lost (HP to 0)
       unitTarget.msgGame = await unitTarget.msgGame.edit(`${unitTarget.msgGame.content}\n${gameEnded}`);
 
       role = unitTarget.secondHP.content.split(' ')[0]; // Get first player role
@@ -429,7 +418,7 @@ const fightStart = async (message, challengerObj, challengedObj, msgCH1HP, msgCH
 }
 
 ///////////////////////////////////////////////////////
-//Randomize number
+// Randomize number
 function getRandomInt(max) {
   return Math.floor(Math.random() * max);
 }
@@ -440,17 +429,17 @@ const Attack = async (message, unitTarget, round) => {
   let damageValue = getRandomInt(6); // Randomize attack damage value
   let critChance = getRandomInt(11);
   let parryValue = getRandomInt(8); // If 0 or 7: Parry 50% of damage
-  let dodgeChance = getRandomInt(9); // If 0: Evade damage entirely
+  let dodgeChance = getRandomInt(12); // If 0: Evade damage entirely
   let attackResultMessage;
 
-  if (damageValue === 0) { damageValue = 1; } // Minimum attack damage
+  if (damageValue === 0 || damageValue === 1) { damageValue = 2; } // Minimum attack damage
 
-  let i = 0;
   let barrierExist = unitTarget.second.status.find(status => status.status === "Barrier");
+  let confuseExist = unitTarget.first.status.find(status => status.status === "Confused");
 
   //////////////////////////////////////
-  // No dodge
-  if (dodgeChance > 0) {
+  // No dodge & No Confuse
+  if (dodgeChance > 0 && !confuseExist) {
 
     ////////////////////////
     //If has 'Barrier' buff
@@ -502,14 +491,33 @@ const Attack = async (message, unitTarget, round) => {
 
     }
 
-    //////////////////////////////////////
-    // If dodged
-  } else {
+  //////////////////////////////////////
+  // If dodged & No Confuse
+  } else if (dodgeChance == 0 && !confuseExist) {
+    
     attackResultMessage =
       `${unitTarget.first.name} performed an attack, but he missed! Pathetic...`;
-  }
+  
+  //////////////////////////////////////
+  // If no dodged & Confused
+  } else if (dodgeChance > 0 && confuseExist) {
+    
+    unitTarget.first.hp -= 3; // Normal Damage but damage himself due to confuse
 
-  let role = unitTarget.secondHP.content.split(' ')[0]; //Get target player role
+    attackResultMessage =
+      `${unitTarget.first.name} tried to hit ${unitTarget.second.name}, but hurt himself due to confusion, dealing 3 damage! Did you forget who your enemy is??`;
+
+  //////////////////////////////////////
+  // If dodged & Confused
+  // Dodge can wake him up immediately
+  }  else if (dodgeChance == 0 && confuseExist) {
+
+    unitTarget.second.hp -= 1; // Small damage
+    
+    attackResultMessage =
+      `${unitTarget.first.name} snapped out of confusion, and managed to land a minor scratch on ${unitTarget.second.name}, dealing 1 damage. To be fair, not bad at all!`;
+    
+  }
 
   // Update status
   await updateStatusDisplay(message, unitTarget, attackResultMessage);
@@ -521,136 +529,169 @@ const Attack = async (message, unitTarget, round) => {
 const Special = async (message, unitTarget, round) => {
   //let status = { status: '', round: 0 }; // Status object
 
-  let method = getRandomInt(5); // Deciding which specil action
-  let methodChance = getRandomInt(7); // Decide success or fail
+  let method = getRandomInt(9); // Deciding which specil action
+  let methodChance = getRandomInt(6); // Decide success or fail
   let methodResultMessage;
 
-  switch (method) {
-    //////////////////////////////////////
-    // Poison
-    case 0:
-    case 2:
-      if (methodChance < 4) { // Success
-
-        //Check if there is existing poison buff to the enemy
-        const hasPoisonStatus = unitTarget.second.status.find(status => status.status === "Poisoned");
-
-        if (!hasPoisonStatus) { // If enemy no existing poison buff
-
-          // Add poison status to second player
-          unitTarget.second.status.push({ status: "Poisoned", round: 4 });
-
+  let isConfuse = unitTarget.first.status.find(status => status.status === "Confused");
+  
+  if (!isConfuse){
+  
+    switch (method) {
+      //////////////////////////////////////
+      // Poison
+      case 0:
+      case 2:
+      case 4:
+        if (methodChance < 4) { // Success
+  
+          //Check if there is existing poison buff to the enemy
+          const hasPoisonStatus = unitTarget.second.status.find(status => status.status === "Poisoned");
+  
+          if (!hasPoisonStatus) { // If enemy no existing poison buff
+  
+            // Add poison status to second player
+            unitTarget.second.status.push({ status: "Poisoned", round: 3 });
+  
+            methodResultMessage =
+              `${unitTarget.first.name} hit ${unitTarget.second.name} with a venomous strike, inflicting 2 poison damage for the next 3 round(s)! How despicable!`;
+  
+          } else { // Enemy already get poisoned
+  
+            methodResultMessage =
+              `${unitTarget.first.name} hit ${unitTarget.second.name} with a venomous strike, but ${unitTarget.second.name} is already poisoned!`;
+  
+          }
+  
+        } else { // Fail
+  
           methodResultMessage =
-            `${unitTarget.first.name} hit ${unitTarget.second.name} with a venomous strike, inflicting 1 poison damage for the next 4 round(s)! How despicable!`;
-
-        } else { // Enemy already get poisoned
-
-          methodResultMessage =
-            `${unitTarget.first.name} hit ${unitTarget.second.name} with a venomous strike, but ${unitTarget.second.name} is already poisoned!`;
-
+            `${unitTarget.first.name} tried to poison ${unitTarget.second.name}, but failed! I repeat, HE FAILED!`;
+  
         }
+  
+        break
+      //////////////////////////////////////
+      // Bleed
+      case 1:
+      case 3:
+      case 5:
+        if (methodChance < 4) { // Success
+  
+          //Check if there is existing bleed buff to the enemy
+          const hasBleedStatus = unitTarget.second.status.find(status => status.status === "Bleed");
+  
+          if (!hasBleedStatus) { // If enemy has no existing bleed buff
 
-      } else { // Fail
-
-        methodResultMessage =
-          `${unitTarget.first.name} tried to poison ${unitTarget.second.name}, but failed! I repeat, HE FAILED!`;
-
-      }
-
-      break
-    //////////////////////////////////////
-    // Bleed
-    case 1:
-    case 3:
-      if (methodChance < 4) { // Success
-
-        //Check if there is existing bleed buff to the enemy
-        const hasBleedStatus = unitTarget.second.status.find(status => status.status === "Bleed");
-
-        if (!hasBleedStatus) { // If enemy has no existing bleed buff
-
-          // Add bleed status to second player
-          unitTarget.second.status.push({ status: "Bleed", round: 2 });
-
+            // Deal 2 damage
+            unitTarget.second.hp -= 2;
+            
+            // Add bleed status to second player
+            unitTarget.second.status.push({ status: "Bleed", round: 1 });
+  
+            methodResultMessage =
+              `${unitTarget.first.name} hit ${unitTarget.second.name} with a vicious stab, dealing 2 damage, then inflict 3 bleed damage in the next 1 round! Ouch!`;
+  
+          } else { // Enemy already bleeding
+  
+            hasBleedStatus.round += 1; // Increase bleed round by 1
+  
+            methodResultMessage =
+              `${unitTarget.first.name} has stabbed ${unitTarget.second.name} with a small knife, ${unitTarget.second.name} gets one more round of bleeding!`;
+  
+          }
+  
+        } else { // Fail
+  
           methodResultMessage =
-            `${unitTarget.first.name} hit ${unitTarget.second.name} with a vicious stab, inflicting 2 bleed damage for the next 2 round(s)! Ouch!`;
-
-        } else { // Enemy already bleeding
-
-          hasBleedStatus.round += 1; // Increase bleed round by 1
-
-          methodResultMessage =
-            `${unitTarget.first.name} has stabbed ${unitTarget.second.name} with a small knife, ${unitTarget.second.name} gets one more round of bleeding!`;
-
+            `${unitTarget.first.name} tried to strike ${unitTarget.second.name} to cause him bleed, but failed! Oh dear!`;
+  
         }
-
-      } else { // Fail
-
-        methodResultMessage =
-          `${unitTarget.first.name} tried to strike ${unitTarget.second.name} to cause him bleed, but failed! Oh dear!`;
-
-      }
-
-      break
-
-    //////////////////////////////////////
-    case 4: // Stun
-      if (methodChance < 2) { // Success
-
-        //Check if there is existing stun buff to the enemy
-        const hasStunStatus = unitTarget.second.status.find(status => status.status === "Stunned");
-
-        if (hasStunStatus) { // If enemy has existing stun buff
-
-          // Increase stun round by 1
-          hasStunStatus.round += 1;
-
-          // Deal 2 damage
-          unitTarget.second.hp -= 2;
-
+  
+        break
+  
+      //////////////////////////////////////
+      // Stun
+      case 6:
+      case 8:
+        if (methodChance < 2) { // Success
+  
+          //Check if there is existing stun buff to the enemy
+          const hasStunStatus = unitTarget.second.status.find(status => status.status === "Stunned");
+  
+          if (hasStunStatus) { // If enemy has existing stun buff
+  
+            // Increase stun round by 1
+            hasStunStatus.round += 1;
+  
+            // Deal 2 damage
+            unitTarget.second.hp -= 2;
+  
+            methodResultMessage =
+              `${unitTarget.first.name} threw a 15kg dumbell at ${unitTarget.second.name} who was still stunned, dealing 2 damage and increase 1 more round of stun!`;
+  
+          } else { // If enemy has no existing stun buff
+  
+            // Add stun status to second player
+            unitTarget.second.status.push({ status: "Stunned", round: 1 });
+  
+            // Deal 1 damage
+            unitTarget.second.hp -= 1;
+  
+            methodResultMessage =
+              `${unitTarget.first.name} hit ${unitTarget.second.name} with a stunning blow, dealing 1 damage and stun him ${unitTarget.second.name} for 1 round!`;
+  
+          }
+  
+        } else { // Fail
+  
+          // Deal 1 damage to himself
+          unitTarget.first.hp -= 1;
+  
           methodResultMessage =
-            `${unitTarget.first.name} threw a 15kg dumbell at ${unitTarget.second.name} who was still stunned, dealing 2 damage and increase 1 more round of stun!`;
-
-        } else { // If enemy has no existing stun buff
-
-          // Add stun status to second player
-          unitTarget.second.status.push({ status: "Stunned", round: 1 });
-
-          // Deal 1 damage
-          unitTarget.second.hp -= 1;
-
-          methodResultMessage =
-            `${unitTarget.first.name} hit ${unitTarget.second.name} with a stunning blow, dealing 1 damage and stun him ${unitTarget.second.name} for 1 round!`;
-
+            `${unitTarget.first.name} swung a heavy hammer at ${unitTarget.second.name}, but missed and hit his own toe, dealing 1 damage to himself! Be careful~`;
+  
         }
-
-      } else { // Fail
-
-        // Deal 1 damage to himself
-        unitTarget.first.hp -= 1;
-
-        methodResultMessage =
-          `${unitTarget.first.name} swung a heavy hammer at ${unitTarget.second.name}, but missed and hit his own toe, dealing 1 damage to himself! Be careful~`;
-
-      }
-
-      break
-
-    //////////////////////////////////////
-    case 5: // Confuse
-      if (methodChance < 2) {
-
-      } else {
-        // Pending
-      }
-      break
-    //////////////////////////////////////
-    default:
-      break
+  
+        break
+  
+      //////////////////////////////////////
+      // Confuse
+      case 7:
+        if (methodChance < 2) {
+          //Check if there is existing stun buff to the enemy
+          const hasConfuseStatus = unitTarget.second.status.find(status => status.status === "Confused");
+  
+          if (hasConfuseStatus) { // If enemy has existing confuse buff
+  
+            methodResultMessage =
+              `${unitTarget.first.name} tried to confuse ${unitTarget.second.name} with random dad jokes, but ${unitTarget.second.name} was already confused...and it was a bad joke too!`;
+  
+          } else { // If enemy has no existing stun buff
+  
+            // Add confuse status to second player
+            unitTarget.second.status.push({ status: "Confused", round: 1 });
+  
+            methodResultMessage =
+              `${unitTarget.first.name} is chanting some Calculus formulas, causing ${unitTarget.second.name} to be confused for 1 round, just like one in the exam field!`;
+  
+          }
+        } else { // Fail
+          
+          methodResultMessage =
+            `${unitTarget.first.name} did a chicken dance in front of  ${unitTarget.second.name}, but ${unitTarget.second.name} just staring at him awkwardly, probably had a mix of confusion and sympathy for him.`;
+          
+        }
+        break
+      //////////////////////////////////////
+      default:
+        break
+    }
+  } else {
+    methodResultMessage =
+      `${unitTarget.first.name} attempted to perform some special move, but was too confused to do so!`;
   }
-
-  let role = unitTarget.secondHP.content.split(' ')[0]; // Get target player role
-
+  
   // Update status
   await updateStatusDisplay(message, unitTarget, methodResultMessage);
 
@@ -659,24 +700,35 @@ const Special = async (message, unitTarget, round) => {
 ///////////////////////////////////////////////////////
 // Perform Escape
 const Flee = async (message, unitTarget, round) => {
-  let escapeChance = getRandomInt(2); // If 0: Escape Failed, 1: Escape Success
+  let escapeChance = getRandomInt(3); // If 0: Escape Failed, 1: Escape Success
   let escapeResultMessage;
 
-  //////////////////////////////////////
-  if (escapeChance === 0) { // If escape failed
-    escapeResultMessage =
-      `${unitTarget.first.name} tried to escape, but failed! Guess there's no way out...`;
+  let isConfused = unitTarget.first.status.find(status => status.status === "Confused");
+  
 
-    //////////////////////////////////////
-  } else if (escapeChance === 1) { // If escape success
+  //////////////////////////////////////
+  // If escape success
+  if (escapeChance === 1 && !isConfused) {
 
     unitTarget.first.hp = 0; // Escape = Suicide
 
     escapeResultMessage =
       `${unitTarget.first.name} has shamelessly ran away!!! [ HP Reduced to 0 ]`;
-  }
+  
+  //////////////////////////////////////
+  // If escape failed
+  } else if (!isConfused) { 
+    escapeResultMessage =
+      `${unitTarget.first.name} tried to escape, but failed! Guess there's no way out...`;
 
-  let role = unitTarget.firstHP.content.split(' ')[0]; // Get current player role
+  //////////////////////////////////////
+  // If escape confusion
+  } else if (isConfused) {
+    unitTarget.first.hp = 4; // Failed, and hurt himself
+    
+    escapeResultMessage =
+      `${unitTarget.first.name} tried to escape in confusion but stumbled, causing himself to suffer 4 damage as he fell to the ground.`;
+  }
 
   // Update status
   await updateStatusDisplay(message, unitTarget, escapeResultMessage);
@@ -698,54 +750,66 @@ const Heal = async (message, unitTarget, round) => {
 
   if (healValue === 0) { healValue = 1; } // Minimum heal value
 
-  ///////////////////////////
-  // Critical Heal
-  if (critChance == 16) {
-    unitTarget.first.hp += healValue * 2; // Heal
+  let isConfused = unitTarget.first.status.find(status => status.status === "Confused");
 
-    healResultMessage =
-      `${unitTarget.first.name} made a critical heal on himself, restored ${healValue * 2} HP!!!`;
-
+  if (!isConfused) {
     ///////////////////////////
-    // Failed Heal
-  } else if (critChance >= 0 && critChance < 3) {
-    unitTarget.first.hp -= 1; // Fail heal, damage himself 1HP
-
-    healResultMessage =
-      `${unitTarget.first.name} performed a healing magic, but he failed! Resulting 1 damage to himself... How incompetent~`;
-
-    ///////////////////////////
-    // Barrier Magic
-  } else if (critChance < 20 && critChance > 16) {
-
+    // Critical Heal
+    if (critChance == 16) {
+      unitTarget.first.hp += healValue * 2; // Heal
+  
+      healResultMessage =
+        `${unitTarget.first.name} made a critical heal on himself, restored ${healValue * 2} HP!!!`;
+  
+      ///////////////////////////
+      // Failed Heal
+    } else if (critChance >= 0 && critChance < 3) {
+      unitTarget.first.hp -= 1; // Fail heal, damage himself 1HP
+  
+      healResultMessage =
+        `${unitTarget.first.name} performed a healing magic, but he failed! Resulting 1 damage to himself... How incompetent~`;
+  
+      ///////////////////////////
+      // Barrier Magic
+    } else if (critChance < 20 && critChance > 16) {
+  
+      // Add barrier status
+      unitTarget.first.status.push({ status: "Barrier", round: 2 });
+  
+      healResultMessage =
+        `${unitTarget.first.name} casted barrier magic that lasts 2 rounds and blocks normal attack once!`;
+  
+      ///////////////////////////
+      // Purify Magic
+    } else if (critChance < 15 && critChance > 11) {
+  
+      // Clear all the negative status status
+      unitTarget.first.status = unitTarget.first.status.filter(status => status.status !== "Poisoned" && status.status !== "Bleed");
+  
+      healResultMessage =
+        `${unitTarget.first.name} casted purify magic, cleansing most negative statuses on himself.`;
+  
+      ///////////////////////////
+      // Normal Heal
+    } else {
+      unitTarget.first.hp += healValue; // Heal
+  
+      healResultMessage =
+        `${unitTarget.first.name} casted healing magic, restoring ${healValue} HP!`;
+  
+    }
+  } else if(isConfused && critChance > 17) {
     // Add barrier status
     unitTarget.first.status.push({ status: "Barrier", round: 2 });
 
     healResultMessage =
-      `${unitTarget.first.name} casted barrier magic that lasts 2 rounds and blocks normal attack once!`;
-
-    ///////////////////////////
-    // Purify Magic
-  } else if (critChance < 15 && critChance > 11) {
-
-    // Clear all the negative status status
-    unitTarget.first.status = unitTarget.first.status.filter(status => status.status !== "Poisoned" && status.status !== "Bleed");
-
-    healResultMessage =
-      `${unitTarget.first.name} casted purify magic, cleansing most negative statuses on himself.`;
-
-    ///////////////////////////
-    // Normal Heal
+      `${unitTarget.first.name} recalled his mother from hometown, snapped him back from confusion, infusing himself with courage and a protective barrier!`;
+    
   } else {
-    unitTarget.first.hp += healValue; // Heal
-
     healResultMessage =
-      `${unitTarget.first.name} casted healing magic, restoring ${healValue} HP!`;
-
+      `${unitTarget.first.name} wanted to cast some healing magic, but failed due to confusion, ending up chanting some random spanish!`;
   }
-
-  let role = unitTarget.firstHP.content.split(' ')[0]; // Get current player role
-
+  
   // Update status
   await updateStatusDisplay(message, unitTarget, healResultMessage);
 
@@ -759,14 +823,16 @@ const statusSettle = async (message, unitTarget) => {
 
 
   for (const statusTarget of statusArrays) { // All player
+
     for (const status of statusTarget.status) { // All status
 
       // Decrease the duration of each status by 1 round
-      // Exclude 'Stunned' and 'Confused', as those required special case
-      if (status.status != "Stunned" && status.status != 'Confused') {
-        status.round--;
-      }
+      status.round--;
 
+      if(statusUpdate){
+        statusUpdate += `\n`;
+      }
+      
       //////////////////////////////////////
       // Check if the status has a corresponding damaging effect
       switch (status.status) {
@@ -774,18 +840,38 @@ const statusSettle = async (message, unitTarget) => {
         ///////////////////////
         //Poisoned
         case 'Poisoned':
-          statusTarget.hp -= 1; // Take damage
-          statusUpdate = `${statusTarget.name} takes 1 damage from poison!`;
+          statusTarget.hp -= 2; // Take damage
+          statusUpdate += `${statusTarget.name} took 2 damage from poison!`;
 
           break;
 
         ///////////////////////
-        case 'Bleed': //Bleed
-          statusTarget.hp -= 2; // Take damage
-          statusUpdate = `${statusTarget.name} takes 2 damage from bleeding!`;
+        // Bleed
+        case 'Bleed':
+          statusTarget.hp -= 3; // Take damage
+          statusUpdate += `${statusTarget.name} took 3 damage from bleeding!`;
 
           break;
 
+        ///////////////////////
+        // Confuse
+        case 'Confused':
+          if (status.round === -1) {
+          
+            statusUpdate += `${statusTarget.name} is still suffering from confusion!`;
+          
+          }
+          break;
+        ///////////////////////
+        // Barrier
+        case 'Barrier':
+          // If the status is 'Barrier', display unique message
+          if (status.round === 0) {
+
+            statusUpdate += `The ${status.status} status on ${statusTarget.name} has worn off.`;
+
+          }
+          break
       }
 
       //////////////////////////////////////
@@ -794,20 +880,53 @@ const statusSettle = async (message, unitTarget) => {
 
         statusUpdate += ` The ${status.status} status has worn off.`;
 
-        // If the status is 'Barrier', display unique message
-      } else if (status.round === 0 && status.status == 'Barrier') {
-
-        statusUpdate += ` The ${status.status} status on ${statusTarget.name} has worn off.`;
-
       }
-
+      
     }
 
+    //////////////////////////////////////
+    // Settle 1 round Status, Exp: 'Stunned', 'Confused'
+    // Each round happened, only if those status is -1, then its status is removed
+    let isStunned = statusTarget.status.find(status => status.status === "Stunned");
+    let isConfused = statusTarget.status.find(status => status.status === "Confused");
+
+    ///////////////////
+    // Settle 'Stunned'
+    if (isStunned) {
+
+      // If the stun status is expired, aka if -1
+      if (isStunned.round < 0) {
+
+        if(statusUpdate){
+          statusUpdate += `\n`;
+        }
+        
+        statusUpdate += `${statusTarget.name} has woke up from stunned!`;
+      }
+    }
+    ///////////////////
+    // Settle 'Confused'
+    if (isConfused) {
+
+      // If the confuse status is expired, aka if -1
+      if (isConfused.round < 0) {
+
+        if(statusUpdate){
+          statusUpdate += `\n`;
+        }
+        
+        statusUpdate += `${statusTarget.name} has recovered from the state of confusion!`;
+      }
+    }
+    
+    //////////////////////////////////////
     // Remove the expired status from all player
     // 'Stunned' and 'Confused' will only disappear after -1 round,
     // So it won't be ignored upon next round
-    statusTarget.status = statusTarget.status.filter(status => status.round > 0 || status.status == 'Stunned' || status.status == 'Confused');
-
+    statusTarget.status = statusTarget.status.filter(status => 
+      (status.round > 0 && status.status != 'Stunned' && status.status != 'Confused') || 
+      (status.round > -1 && status.status == 'Stunned' || status.status == 'Confused'));
+    
   }
 
   // Update status
@@ -818,7 +937,7 @@ const statusSettle = async (message, unitTarget) => {
 ///////////////////////////////////////////////////////
 // Settle all player status display
 const updateStatusDisplay = async (message, unitTarget, incomingUpdate) => {
-  // Update status
+  
   let statusStringP1 = `` // Player 1 status string
   unitTarget.first.status.forEach(status => {
 
@@ -830,6 +949,7 @@ const updateStatusDisplay = async (message, unitTarget, incomingUpdate) => {
       statusStringP1 += `{${status.status}: ${status.round} Round(s)} `
     }
   });
+  
   let statusStringP2 = `` // PLayer 2 status string
   unitTarget.second.status.forEach(status => {
 
@@ -844,7 +964,7 @@ const updateStatusDisplay = async (message, unitTarget, incomingUpdate) => {
 
   let roleP1 = unitTarget.firstHP.content.split(' ')[0]; // Get first player role
   let roleP2 = unitTarget.secondHP.content.split(' ')[0]; // Get second player role
-
+  
   // Update first player status
   unitTarget.firstHP = await unitTarget.firstHP.edit(`${roleP1} ${unitTarget.first.name} \tHP: ${unitTarget.first.hp}/10 \tStatus: [ ${statusStringP1} ]`);
 

@@ -3,7 +3,7 @@ const { EmbedBuilder } = require('discord.js');
 module.exports = {
   name: 'help',
 
-  aliases: ['help'],
+  aliases: ['help', 'h'],
 
   description: 'They need help.',
 

@@ -165,7 +165,7 @@ module.exports = {
 
                 // Proceed to start fight
                 await fightGame(message, challenger, challenged, gameAnnouceMessage, client);
-              }, 6000);
+              }, 7000);
 
             }
             //////////////////////
@@ -193,7 +193,15 @@ module.exports = {
 
               // Rejected response
             } else {
+              if (challenger === challenged){
+
+                message.channel.send(`${challenged} has declined the challenge from himself...I guess no one cares.`);
+                
+              } else {
+              
               message.channel.send(`Sadly, Our Dear ${challenged} has shamelessly turned down the challenge request from ${challenger}...`);
+                
+              }
             }
 
           }
@@ -267,7 +275,7 @@ const fightGame = async (message, challenger, challenged, gameAnnouceMessage, cl
   let challengerObj = { name: challenger, hp: 10, status: [] };
   let challengedObj = { name: challenged, hp: 10, status: [] };
 
-  gameAnnouceMessage = await gameAnnouceMessage.edit(`${gameAnnouceMessage.content}\n:bellhop: :bellhop: :bellhop: :bellhop: :bellhop: FIGHT STARTED :bellhop: :bellhop: :bellhop: :bellhop: :bellhop:`);
+  gameAnnouceMessage = await gameAnnouceMessage.edit(`${gameAnnouceMessage.content}\n:bellhop: :bellhop: :bellhop: FIGHT STARTED :bellhop: :bellhop: :bellhop:`);
 
   gameAnnouceMessage = await gameAnnouceMessage.edit(`${gameAnnouceMessage.content}\n**|>---------------<| PLAYER STAT |>---------------<|**`);
 
@@ -354,7 +362,7 @@ const fightStart = async (message, challengerObj, challengedObj, msgCH1HP, msgCH
         await Attack(message, unitTarget, round);
 
       } else if (decideAction > 13 && decideAction < 21) { // 14~20
-        //POISON or BLEED or STUNNED
+        //POISON or BLEED or STUNNED or CONFUSED
         await Special(message, unitTarget, round);
 
       } else if (decideAction > 20 && decideAction < 22) { // 21
@@ -392,7 +400,13 @@ const fightStart = async (message, challengerObj, challengedObj, msgCH1HP, msgCH
 
     ///////////////////////
     //Annouce winner if one of the player lost
-    if (unitTarget.first.hp < 1 && unitTarget.second.hp < 1) { // DRAW
+    if (unitTarget.first.name == unitTarget.second.name && (unitTarget.first.hp < 1 || unitTarget.second.hp < 1)) { // Player challenge himself
+      unitTarget.msgGame = await unitTarget.msgGame.edit(`${unitTarget.msgGame.content}\n${gameEnded}`);
+
+      gameResultMessage = await message.channel.send(
+        `The Fight's Winner is... Does it even matter? It's the same person!`);
+
+    } else if (unitTarget.first.hp < 1 && unitTarget.second.hp < 1) { // DRAW
       unitTarget.msgGame = await unitTarget.msgGame.edit(`${unitTarget.msgGame.content}\n${gameEnded}`);
       
       gameResultMessage = await message.channel.send(
@@ -460,7 +474,7 @@ const Attack = async (message, unitTarget, round) => {
         unitTarget.second.hp -= damageValue; // Cirt Damage is halved
 
         attackResultMessage =
-          `${unitTarget.first.name} landed a critical strike on ${unitTarget.second.name}, but luckily ${unitTarget.second.name} parried 50% of the attack, took only ${Math.round(damageValue)} damage!`;
+          `${unitTarget.first.name} landed a critical strike on ${unitTarget.second.name}, but luckily ${unitTarget.second.name} parried 50% of the attack, took only ${Math.round(damageValue)} dmg!`;
 
         // If no critical
       } else {
@@ -468,7 +482,7 @@ const Attack = async (message, unitTarget, round) => {
         unitTarget.second.hp -= Math.round(damageValue / 2); // Damage is halved
 
         attackResultMessage =
-          `${unitTarget.first.name} attacked ${unitTarget.second.name}, but ${unitTarget.second.name} parried 50% of the attack skillfully, took only ${Math.round(damageValue / 2)} damage!`;
+          `${unitTarget.first.name} attacked ${unitTarget.second.name}, but ${unitTarget.second.name} parried 50% of the attack skillfully, took only ${Math.round(damageValue / 2)} dmg!`;
       }
       ////////////////////////
       // If no parry
@@ -479,14 +493,14 @@ const Attack = async (message, unitTarget, round) => {
         unitTarget.second.hp -= damageValue * 2; // Normal Damage
 
         attackResultMessage =
-          `${unitTarget.first.name} landed a perfect critical strike on ${unitTarget.second.name}, dealing ${damageValue * 2} damage! Unbelieveable!!!`;
+          `${unitTarget.first.name} landed a perfect critical strike on ${unitTarget.second.name}, dealing ${damageValue * 2} dmg! Unbelievable!!!`;
 
         // If no critical
       } else {
         unitTarget.second.hp -= damageValue; // Normal Damage
 
         attackResultMessage =
-          `${unitTarget.first.name} has dealt ${damageValue} to ${unitTarget.second.name}!`;
+          `${unitTarget.first.name} has dealt ${damageValue} dmg to ${unitTarget.second.name}!`;
       }
 
     }
@@ -505,7 +519,7 @@ const Attack = async (message, unitTarget, round) => {
     unitTarget.first.hp -= 3; // Normal Damage but damage himself due to confuse
 
     attackResultMessage =
-      `${unitTarget.first.name} tried to hit ${unitTarget.second.name}, but hurt himself due to confusion, dealing 3 damage! Did you forget who your enemy is??`;
+      `${unitTarget.first.name} tried to hit ${unitTarget.second.name}, but hurt himself due to confusion, dealing 3 dmg! Did you forget who your enemy is??`;
 
   //////////////////////////////////////
   // If dodged & Confused
@@ -515,7 +529,7 @@ const Attack = async (message, unitTarget, round) => {
     unitTarget.second.hp -= 1; // Small damage
     
     attackResultMessage =
-      `${unitTarget.first.name} snapped out of confusion, and managed to land a minor scratch on ${unitTarget.second.name}, dealing 1 damage. To be fair, not bad at all!`;
+      `${unitTarget.first.name} snapped out of confusion, and managed to land a minor scratch on ${unitTarget.second.name}, dealing 1 dmg. To be fair, not bad at all!`;
     
   }
 
@@ -554,7 +568,7 @@ const Special = async (message, unitTarget, round) => {
             unitTarget.second.status.push({ status: "Poisoned", round: 3 });
   
             methodResultMessage =
-              `${unitTarget.first.name} hit ${unitTarget.second.name} with a venomous strike, inflicting 2 poison damage for the next 3 round(s)! How despicable!`;
+              `${unitTarget.first.name} hit ${unitTarget.second.name} with a venomous strike, inflicting 2 poison dmg for the next 3 round(s)! How despicable!`;
   
           } else { // Enemy already get poisoned
   
@@ -577,29 +591,15 @@ const Special = async (message, unitTarget, round) => {
       case 3:
       case 5:
         if (methodChance < 4) { // Success
-  
-          //Check if there is existing bleed buff to the enemy
-          const hasBleedStatus = unitTarget.second.status.find(status => status.status === "Bleed");
-  
-          if (!hasBleedStatus) { // If enemy has no existing bleed buff
 
-            // Deal 2 damage
-            unitTarget.second.hp -= 2;
-            
-            // Add bleed status to second player
-            unitTarget.second.status.push({ status: "Bleed", round: 1 });
-  
-            methodResultMessage =
-              `${unitTarget.first.name} hit ${unitTarget.second.name} with a vicious stab, dealing 2 damage, then inflict 3 bleed damage in the next 1 round! Ouch!`;
-  
-          } else { // Enemy already bleeding
-  
-            hasBleedStatus.round += 1; // Increase bleed round by 1
-  
-            methodResultMessage =
-              `${unitTarget.first.name} has stabbed ${unitTarget.second.name} with a small knife, ${unitTarget.second.name} gets one more round of bleeding!`;
-  
-          }
+          // Deal 2 damage
+          unitTarget.second.hp -= 2;
+          
+          // Add bleed status to second player
+          unitTarget.second.status.push({ status: "Bleed", round: 1 });
+
+          methodResultMessage =
+            `${unitTarget.first.name} hit ${unitTarget.second.name} with a vicious stab, dealing 2 dmg, then inflict 3 bleed dmg in the next 1 round! Ouch!`;
   
         } else { // Fail
   
@@ -628,7 +628,7 @@ const Special = async (message, unitTarget, round) => {
             unitTarget.second.hp -= 2;
   
             methodResultMessage =
-              `${unitTarget.first.name} threw a 15kg dumbell at ${unitTarget.second.name} who was still stunned, dealing 2 damage and increase 1 more round of stun!`;
+              `${unitTarget.first.name} threw a 15kg dumbell at ${unitTarget.second.name} who was still stunned, dealing 2 dmg and increase 1 more round of stun!`;
   
           } else { // If enemy has no existing stun buff
   
@@ -639,7 +639,7 @@ const Special = async (message, unitTarget, round) => {
             unitTarget.second.hp -= 1;
   
             methodResultMessage =
-              `${unitTarget.first.name} hit ${unitTarget.second.name} with a stunning blow, dealing 1 damage and stun him ${unitTarget.second.name} for 1 round!`;
+              `${unitTarget.first.name} hit ${unitTarget.second.name} with a stunning blow, dealing 1 dmg and stun him ${unitTarget.second.name} for 1 round!`;
   
           }
   
@@ -649,7 +649,7 @@ const Special = async (message, unitTarget, round) => {
           unitTarget.first.hp -= 1;
   
           methodResultMessage =
-            `${unitTarget.first.name} swung a heavy hammer at ${unitTarget.second.name}, but missed and hit his own toe, dealing 1 damage to himself! Be careful~`;
+            `${unitTarget.first.name} swung a heavy hammer at ${unitTarget.second.name}, but missed and hit his own toe, dealing 1 dmg to himself! Be careful~`;
   
         }
   
@@ -727,7 +727,7 @@ const Flee = async (message, unitTarget, round) => {
     unitTarget.first.hp = 4; // Failed, and hurt himself
     
     escapeResultMessage =
-      `${unitTarget.first.name} tried to escape in confusion but stumbled, causing himself to suffer 4 damage as he fell to the ground.`;
+      `${unitTarget.first.name} tried to escape in confusion but stumbled, causing himself to suffer 4 dmg as he fell to the ground.`;
   }
 
   // Update status
@@ -767,7 +767,7 @@ const Heal = async (message, unitTarget, round) => {
       unitTarget.first.hp -= 1; // Fail heal, damage himself 1HP
   
       healResultMessage =
-        `${unitTarget.first.name} performed a healing magic, but he failed! Resulting 1 damage to himself... How incompetent~`;
+        `${unitTarget.first.name} performed a healing magic, but he failed! Resulting 1 dmg to himself... How incompetent~`;
   
       ///////////////////////////
       // Barrier Magic
@@ -841,7 +841,7 @@ const statusSettle = async (message, unitTarget) => {
         //Poisoned
         case 'Poisoned':
           statusTarget.hp -= 2; // Take damage
-          statusUpdate += `${statusTarget.name} took 2 damage from poison!`;
+          statusUpdate += `${statusTarget.name} took 2 dmg from poison!`;
 
           break;
 
@@ -849,14 +849,14 @@ const statusSettle = async (message, unitTarget) => {
         // Bleed
         case 'Bleed':
           statusTarget.hp -= 3; // Take damage
-          statusUpdate += `${statusTarget.name} took 3 damage from bleeding!`;
+          statusUpdate += `${statusTarget.name} took 3 dmg from bleeding!`;
 
           break;
 
         ///////////////////////
         // Confuse
         case 'Confused':
-          if (status.round === -1) {
+          if (status.round > -1) {
           
             statusUpdate += `${statusTarget.name} is still suffering from confusion!`;
           
@@ -925,7 +925,8 @@ const statusSettle = async (message, unitTarget) => {
     // So it won't be ignored upon next round
     statusTarget.status = statusTarget.status.filter(status => 
       (status.round > 0 && status.status != 'Stunned' && status.status != 'Confused') || 
-      (status.round > -1 && status.status == 'Stunned' || status.status == 'Confused'));
+      (status.round > -1 && (status.status == 'Stunned' || status.status == 'Confused'))
+    );
     
   }
 

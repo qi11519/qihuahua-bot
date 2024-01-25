@@ -255,7 +255,7 @@ module.exports = {
 
         //Get all fights, by iterating
         for (let fight of fightingList) {
-          pvp_array.push({ name: i + ". <@" + fight[0] + "> VS. <@" + fight[1] + ">", value: "Challenge from: <@" + fight[0] + ">" });
+          pvp_array.push({ name: i + ". " + fight[0] + " VS. " + fight[1], value: "Challenge from: " + fight[0] });
           i++;
         }
 

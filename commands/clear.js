@@ -53,7 +53,7 @@ module.exports = {
     embed_Msg.description = "Everything that can be cleared is cleared. [Playlist Cleared.]";
     message.channel.send({ embeds: [embed_Msg] });
 
-    console.log(">Song Queue Cleared.");
+    // console.log(">Song Queue Cleared.");
     
     client.server_queue.songs = []; //Return a empty array
   }

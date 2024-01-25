@@ -14,7 +14,7 @@ module.exports = {
   description: 'Challenge someone to a game of Rock Paper Scissors!',
 
   async execute(interaction, args, cmd, client) {
-    console.log("activated");
+    // console.log("activated");
     const opponent = interaction.options.getMember('opponent');
     if (!opponent) {
       return interaction.reply('Please mention an opponent to challenge!');

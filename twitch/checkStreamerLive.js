@@ -32,6 +32,9 @@ const authenticate = async () => {
   });
 
   const data = await response.json();
+  if (data.data) {
+    
+  }
   accessToken = data.access_token;
 };
 

@@ -2,9 +2,8 @@ const Discord = require("discord.js")
 const dotenv = require("dotenv")
 const express = require("express");
 const keepAlive = require("./server");
-const { checkStream, authenticate } = require("./checkStreamerLive");
-const checkYTUpload = require('./checkYTUpload');
-
+const { checkStream, authenticate } = require("./twitch/checkStreamerLive");
+const checkYTUpload = require('./youtube/checkYTUpload');
 
 const { REST } = require("@discordjs/rest")
 const { Routes } = require("discord-api-types/v9")
@@ -21,7 +20,11 @@ const { Player } = require("discord-player")
 const ytdl = require("ytdl-core");
 const { Client, Intents } = require('discord.js');
 
+// Check if Twitch message was sent to Discord before
+// To avoid the message being sent
 let twitchMessageSent = false;
+
+// Youtube Message Holder
 let ytMessageSent = {
   color: 0xC70808,
   description: "Random Text",
@@ -31,12 +34,16 @@ const client = new Client({
   partials: ["MESSAGE", "CHANNEL", "REACTION"], intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_VOICE_STATES] });
 
 const commands = []; //To store command
-client.commands = new Discord.Collection(); //Storing available command as file identifier(basically, using command to find file name)
+
+//Storing available command as file identifier(basically, using command to find file name)
+client.commands = new Discord.Collection(); 
 client.events = new Discord.Collection(); //same as above
 
+//This one is for recording and capturing 'server_queue' from 'message'
+client.queue = new Map(); 
 
-client.queue = new Map(); //This one is for recording and capturing 'server_queue' from 'message'
-client.server_queue = new Map(); //This one is for recording song queue and bot's connection
+//This one is for recording song queue and bot's connection
+client.server_queue = new Map(); 
 
 //Create audio player for playing music
 //This one is variable holder for client.player
@@ -71,11 +78,8 @@ client.on('guildMemberAdd', guildMember => {
 /////////////////////////////////////////////////////////////
 client.on('ready', async () => {
   await authenticate();
-  console.log(`>Authenticated with Twitch API`);
-  
-  console.log(`>Twitch API ready for ${client.user.tag}`);
-  console.log(`>Youtube API ready for ${client.user.tag}`);
-  
+
+  // Set interval to check both Twitch and Youtube every 30 minutes
   setInterval(async () => {
     twitchMessageSent = await checkStream(client, twitchMessageSent);
     ytMessageSent = await checkYTUpload(client, ytMessageSent);
@@ -85,5 +89,4 @@ client.on('ready', async () => {
 /////////////////////////////////////////////////////////////
 
 keepAlive();
-console.log('hello');
 client.login(process.env.token);

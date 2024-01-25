@@ -145,7 +145,7 @@ module.exports = {
             thumbnails: video_details.thumbnails[0],
             channel: video_details.channel
           };
-          console.log(song.title);
+          // console.log(song.title);
           await handleVideo(song, message, client, voiceChannel); //Handling video, go check the handleVideo() function
           numVideos += 1; //Count videos
         }
@@ -164,8 +164,8 @@ module.exports = {
 
         message.channel.send({ embeds: [added_Embed_Msg], files: ['./images/qihuahua.jpg'] });
 
-        console.log("--------------");
-        console.log("Total of " + numVideos + " Videos from the playlist is added to the queue.");
+        // console.log("--------------");
+        // console.log("Total of " + numVideos + " Videos from the playlist is added to the queue.");
 
 
       } else { //If not playlist
@@ -211,7 +211,7 @@ module.exports = {
 
           if (!(args[0].match(ytRegExp))) {
 
-            console.log('>Searching videos.');
+            // console.log('>Searching videos.');
 
             embed_Msg.description = "Searching videos...";
             message.channel.send({ embeds: [embed_Msg] });
@@ -228,7 +228,7 @@ module.exports = {
     } 
     //JUMP SONG COMMAND
     else if (cmd === 'playsearch' || cmd === 'ps') {
-      console.log('>Play selected result!');
+      // console.log('>Play selected result!');
       playsearch(message, args[0], client);
     }
   }
@@ -252,9 +252,9 @@ const video_player = async (message, song, client) => {
     //queue.delete(guild.id);
     return;
   } else {
-    console.log('----------------------');//I am a line, ignore me
+    // console.log('----------------------');//I am a line, ignore me
     //To check what is the current captured song
-    console.log(">Playing: " + song.title);
+    // console.log(">Playing: " + song.title);
   }
 
   //converting video into playable source for audio player
@@ -401,7 +401,7 @@ const search_song = async (message, query) => {
     fields: song_queue_array,
   };
 
-  console.log('>Found videos!');
+  // console.log('>Found videos!');
   message.channel.send({ embeds: [search_Embed_Msg], files: ['./images/qihuahua.jpg'] });
 }
 
@@ -425,7 +425,7 @@ const playsearch = async (message, target, client) => {
 
   if (isNaN(choice)) { //Usually some retarded will enter something other than digit
     embed_Msg.description = "Maybe you should give a proper number, not random text... [Invalid index for search result.]";
-    console.log('>Failed play search! [1]');
+    // console.log('>Failed play search! [1]');
     return message.channel.send({ embeds: [embed_Msg] });
 
   } else {
@@ -438,7 +438,7 @@ const playsearch = async (message, target, client) => {
 
     } else { //If given index is bigger than the queue's length
       embed_Msg.description = "I don't think that index is reachable. [Input index doesn't match the index of search result.]";
-      console.log('>Failed play search! [2]');
+      // console.log('>Failed play search! [2]');
       return message.channel.send({ embeds: [embed_Msg] });
     }
   }

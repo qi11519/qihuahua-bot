@@ -26,4 +26,4 @@ Whether you want to enjoy some music, stay updated on your favorite streamers, o
 
 <h2>Invite Link</h2>
 
-- <h3>Not Yet To Be Released</h3>
+- <h3>~~Not Yet To Be Released~~</h3> <h5>Less likely to be release in the future.</h5>
